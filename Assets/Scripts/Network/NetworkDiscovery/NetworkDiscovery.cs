@@ -19,6 +19,7 @@ public abstract class NetworkDiscovery<TBroadCast, TResponse> : MonoBehaviour
     }
 
     UdpClient m_Client;
+
     [SerializeField] ushort m_Port = 47777;
 
     // This is long because unity inspector does not like ulong.
@@ -62,7 +63,7 @@ public abstract class NetworkDiscovery<TBroadCast, TResponse> : MonoBehaviour
             throw new InvalidOperationException("Cannot send client broadcast while not running in client mode. Call StartClient first.");
         }
 
-        IPEndPoint endPoint = new IPEndPoint(Tools.GetLocalIPAddressBroadcast(), m_Port);
+        IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, m_Port);
 
         using (FastBufferWriter writer = new FastBufferWriter(1024, Allocator.Temp, 1024 * 64))
         {
@@ -144,20 +145,10 @@ public abstract class NetworkDiscovery<TBroadCast, TResponse> : MonoBehaviour
         IsServer = isServer;
         IsClient = !isServer;
 
-
         // If we are not a server we use the 0 port (let udp client assign a free port to us)
         var port = isServer ? m_Port : 0;
-#if !UNITY_ANDROID
-        foreach (var ActiveUdpListener in System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().GetActiveUdpListeners())
-        {
-            if (ActiveUdpListener.Port == port)
-            {
-                Debug.LogError("Port already in use");
-            }
-        }
-#endif //!UNITY_ANDROID
 
-        m_Client = new UdpClient(port) { EnableBroadcast = true, MulticastLoopback = false, Ttl = 250 };
+        m_Client = new UdpClient(port) { EnableBroadcast = true, MulticastLoopback = false };
 
         _ = ListenAsync(isServer ? ReceiveBroadcastAsync : new Func<Task>(ReceiveResponseAsync));
 
@@ -229,7 +220,7 @@ public abstract class NetworkDiscovery<TBroadCast, TResponse> : MonoBehaviour
 
                 writer.WriteNetworkSerializable(response);
                 var data = writer.ToArray();
-                Debug.Log("Server got broadcast from " + udpReceiveResult.RemoteEndPoint.Address.ToString());
+
                 await m_Client.SendAsync(data, data.Length, udpReceiveResult.RemoteEndPoint);
             }
         }

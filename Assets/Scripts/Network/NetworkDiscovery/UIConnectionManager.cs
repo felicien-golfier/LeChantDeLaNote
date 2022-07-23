@@ -14,6 +14,7 @@ public class UIConnectionManager : MonoBehaviour
     private bool isConnecting = false;
     private string[] ConnectionStatusTexts = { "Not Connected", "Connected as CLIENT", "Connected as HOST", "Connection..." };
     private NetworkManager networkManager;
+    private MyNetworkDiscovery networkDiscovery;
 
     private void Start()
     {
@@ -23,6 +24,8 @@ public class UIConnectionManager : MonoBehaviour
             Debug.LogError("NO NETWORK MANAGER !!");
             return;
         }
+        connectingText.text = ConnectionStatusTexts[0];
+        networkDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
     }
 
     public void StartClientConnection()
@@ -33,7 +36,7 @@ public class UIConnectionManager : MonoBehaviour
         networkManager.OnClientConnectedCallback += OnClientConnected;
         connectingText.text = ConnectionStatusTexts[3];
         isConnecting = true;
-        networkManager.GetComponent<MyNetworkDiscovery>().StartClient();
+        networkDiscovery.StartClient();
     }
 
     public void StartHostButton()
@@ -46,6 +49,12 @@ public class UIConnectionManager : MonoBehaviour
         connectingText.text = ConnectionStatusTexts[3];
         isConnecting = true;
         networkManager.StartHost();
+    }
+
+    public void ResetNetwork()
+    {
+        networkManager.Shutdown();
+        OnDisconnection();
     }
     private void OnClientConnected(ulong id)
     {
@@ -75,9 +84,16 @@ public class UIConnectionManager : MonoBehaviour
     {
         if (networkManager.LocalClientId == id)
         {
-            networkManager.OnClientDisconnectCallback -= ClientDisconnection;
-            connectingText.text = ConnectionStatusTexts[0];
-            connectionPanel.SetActive(true);
+            OnDisconnection();
         }
+    }
+
+    private void OnDisconnection()
+    {
+        networkManager.OnClientDisconnectCallback -= ClientDisconnection;
+        connectingText.text = ConnectionStatusTexts[0];
+        connectionPanel.SetActive(true);
+        networkDiscovery.StopDiscovery();
+        isConnecting = false;
     }
 }

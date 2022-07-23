@@ -2,9 +2,8 @@ using System;
 using System.Net;
 using System.Threading;
 using System.Collections;
-using UnityEngine.UI;
 using Unity.Netcode;
-using Unity.Netcode.Transports.UNET;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -21,12 +20,11 @@ public class MyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Disco
     Coroutine broadcastCoroutine = null;
 
     public DiscoveryBroadcastData data;
-    public string ServerName = "TestServer";
+    public string DefaultServerName = "TestServer";
     public float broadcastInterval = 2f;
     private bool bIsConnecting = false;
     private Mutex mutexStartConnection = new Mutex();
     private string addressToConnectTo;
-    private bool? WantToConnectAsClient = null;
 
     public void Awake()
     {
@@ -46,7 +44,8 @@ public class MyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Disco
     public void ConnectAsClient(string ipAddress)
     {
         Debug.Log("Connecting to address " + ipAddress);
-        ((UNetTransport)networkManager.NetworkConfig.NetworkTransport).ConnectAddress = ipAddress;
+        if (ipAddress != Tools.GetLocalIPv4())
+            ((UnityTransport)networkManager.NetworkConfig.NetworkTransport).ConnectionData.Address = ipAddress;
         networkManager.StartClient();
         PlayerPrefs.SetString("IpAddress", ipAddress);
 
@@ -89,8 +88,8 @@ public class MyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Disco
     {
         response = new DiscoveryResponseData()
         {
-            ServerName = ServerName,
-            Port = (ushort)((UNetTransport)networkManager.NetworkConfig.NetworkTransport).ServerListenPort,
+            ServerName = DefaultServerName,
+            Port = ((UnityTransport)networkManager.NetworkConfig.NetworkTransport).ConnectionData.Port,
         };
         return true;
     }
