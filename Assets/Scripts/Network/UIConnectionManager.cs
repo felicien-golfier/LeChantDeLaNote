@@ -51,6 +51,11 @@ public class UIConnectionManager : MonoBehaviour
         networkManager.StartHost();
     }
 
+    public void DirectIpConnection(TMPro.TMP_InputField field)
+    {
+        networkDiscovery.ConnectAsClient(field.text);
+    }
+
     public void ResetNetwork()
     {
         networkManager.Shutdown();

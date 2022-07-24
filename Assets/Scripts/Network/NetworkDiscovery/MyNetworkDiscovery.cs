@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading;
 using System.Collections;
 using Unity.Netcode;
-using Unity.Netcode.Transports.UTP;
+using Unity.Netcode.Transports.UNET;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -44,8 +44,8 @@ public class MyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Disco
     public void ConnectAsClient(string ipAddress)
     {
         Debug.Log("Connecting to address " + ipAddress);
-        if (ipAddress != Tools.GetLocalIPv4())
-            ((UnityTransport)networkManager.NetworkConfig.NetworkTransport).ConnectionData.Address = ipAddress;
+        //if (ipAddress != Tools.GetLocalIPv4())
+            ((UNetTransport)networkManager.NetworkConfig.NetworkTransport).ConnectAddress = ipAddress;
         networkManager.StartClient();
         PlayerPrefs.SetString("IpAddress", ipAddress);
 
@@ -89,7 +89,7 @@ public class MyNetworkDiscovery : NetworkDiscovery<DiscoveryBroadcastData, Disco
         response = new DiscoveryResponseData()
         {
             ServerName = DefaultServerName,
-            Port = ((UnityTransport)networkManager.NetworkConfig.NetworkTransport).ConnectionData.Port,
+            Port = (ushort)((UNetTransport)networkManager.NetworkConfig.NetworkTransport).ConnectPort,
         };
         return true;
     }

@@ -4,18 +4,8 @@ using System.Net.Sockets;
 using System.Collections;
 using UnityEngine;
 
-[Serializable]
-public enum Cardinal
-{
-    North,
-    East,
-    South,
-    West
-}
 public class Tools : MonoBehaviour
 {
-    public static float TimeBeforeQuitForReal = .3f;
-
     private static Tools _instance;
     public static Tools instance
     {
@@ -37,48 +27,6 @@ public class Tools : MonoBehaviour
     public void StopDisplayThisShit(GameObject go)
     {
         go.SetActive(false);
-    }
-
-    public static Cardinal GetOppositCardinal(Cardinal cardinal)
-    {
-        int CardinalInt = (int)cardinal;
-        int opositCardinalInt = (CardinalInt + 2) % 4;
-        return (Cardinal)opositCardinalInt;
-    }
-    public static void GetSideCoordinatesToAdd(Cardinal cardinal, out int x, out int y, bool isUpsideDown)
-    {
-
-        // METHOD 1 :
-        int cardinalInt = (int)cardinal;
-        int CardModulo2 = cardinalInt % 2;
-        int CardInferior2 = cardinalInt < 2 ? 1 : -1;
-        // We calculate the Position according to the cardinal : NORTH = 0 => (0,1); EAST = 1 => (1,0); SOUTH = 2 => (0,-1); WEST = 3 => (-1,0)
-        x = CardModulo2 * CardInferior2;
-        y = ((CardModulo2 + 1) % 2) * CardInferior2;
-
-        //METHOD 2:
-        if (isUpsideDown)
-        { 
-            if(cardinal == Cardinal.East || cardinal == Cardinal.West)
-            {
-                x *= -1;
-            }
-            else
-            {
-                y *= -1;
-            }
-        }
-    }
-    public static void GetSideCoordinates(Cardinal cardinal, ref int x, ref int y)
-    {
-        GetSideCoordinatesToAdd(cardinal, out int sideXToAdd, out int sideYToAdd, IsUpsideDown(y));
-        x += sideXToAdd;
-        y += sideYToAdd;
-    }
-
-    public static bool IsUpsideDown(int y)
-    {
-        return y % 2 != 0;
     }
 
     public static IEnumerator RoutineCallFunctionNextFrame(Action Func)
