@@ -6,8 +6,8 @@ using System;
 
 public class PlayerControler : MonoBehaviour
 {
-
     public float speed = 15.0f;
+    private VJHandler Joystick;
     private float horizontalInput;
     private float verticalInput;
     private string[] direction;
@@ -23,6 +23,7 @@ public class PlayerControler : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Joystick = VJHandler.instance;
         Color playercolor = new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         foreach (SpriteRenderer sr in GetComponentsInChildren<SpriteRenderer>())
         {
@@ -36,12 +37,24 @@ public class PlayerControler : MonoBehaviour
     {
         if (!isLocalPlayer)
             return;
+#if UNITY_ANDROID
+        horizontalInput = Joystick.InputDirection.x;
+        verticalInput = Joystick.InputDirection.y;
+#else
         // Moving the player
         horizontalInput = Input.GetAxis("Horizontal");
         verticalInput = Input.GetAxis("Vertical");
+#endif
 
         if (verticalInput == 0 && horizontalInput == 0)
             return;
+
+        UpdateTransform();
+    }
+
+    private void UpdateTransform()
+    {
+
 
         Vector3 oldPos = transform.position;
         float frameSpeed = Time.deltaTime * speed;
@@ -49,16 +62,7 @@ public class PlayerControler : MonoBehaviour
         float acos = Mathf.Acos(frameTranslation.normalized.x);
         float sign = Mathf.Sign(Mathf.Sin(frameTranslation.normalized.y));
         float radAngle = acos * sign;
-        transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg* acos *sign -90);
+        transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Rad2Deg * acos * sign -90);
         transform.position = transform.position + frameTranslation;
-        //Vector3 movement = new Vector3(horizontalInput, 0, verticalInput).normalized;
-        //transform.Translate(movement * Time.deltaTime * speed * horizontalInput);
-
-        //Quaternion targetRotation = Quaternion.LookRotation(movement); 
-        //targetRotation = Quaternion.RotateTowards(transform.rotation,targetRotation, 360 * Time.fixedDeltaTime); transform.MovePosition(m_Rb.position + movement * speed * Time.fixedDeltaTime);
-        //m_Rb.MoveRotation(targetRotation);
-
     }
-
-
 }
