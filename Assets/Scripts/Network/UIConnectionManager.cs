@@ -29,14 +29,18 @@ public class UIConnectionManager : MonoBehaviour
     }
 
     public void StartClientConnection()
-    {
+    { 
         if (!networkManager || networkManager.IsClient || networkManager.IsServer || isConnecting)
             return;
+        OnStartClient();
+        networkDiscovery.StartClient();
+    }
 
+    private void OnStartClient()
+    {
         networkManager.OnClientConnectedCallback += OnClientConnected;
         connectingText.text = ConnectionStatusTexts[3];
         isConnecting = true;
-        networkDiscovery.StartClient();
     }
 
     public void StartHostButton()
@@ -53,6 +57,9 @@ public class UIConnectionManager : MonoBehaviour
 
     public void DirectIpConnection(TMPro.TMP_InputField field)
     {
+        if (!networkManager || networkManager.IsClient || networkManager.IsServer || isConnecting)
+            return; 
+        OnStartClient();
         networkDiscovery.ConnectAsClient(field.text);
     }
 
