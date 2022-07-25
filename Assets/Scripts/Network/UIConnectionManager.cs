@@ -10,6 +10,7 @@ public class UIConnectionManager : MonoBehaviour
     [Header("Connection Interface")]
     public TMPro.TextMeshProUGUI connectingText;
     public GameObject connectionPanel;
+    public GameObject Joystick;
 
     private bool isConnecting = false;
     private string[] ConnectionStatusTexts = { "Not Connected", "Connected as CLIENT", "Connected as HOST", "Connection..." };
@@ -26,6 +27,9 @@ public class UIConnectionManager : MonoBehaviour
         }
         connectingText.text = ConnectionStatusTexts[0];
         networkDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
+#if UNITY_ANDROID
+        Joystick.SetActive(false);
+#endif
     }
 
     public void StartClientConnection()
@@ -77,6 +81,10 @@ public class UIConnectionManager : MonoBehaviour
             connectingText.text = ConnectionStatusTexts[1];
             networkManager.OnClientConnectedCallback -= OnClientConnected;
             networkManager.OnClientDisconnectCallback += ClientDisconnection;
+
+#if UNITY_ANDROID
+            Joystick.SetActive(true);
+#endif
             connectionPanel.SetActive(false);
             isConnecting = false;
         }
@@ -89,6 +97,9 @@ public class UIConnectionManager : MonoBehaviour
         networkManager.OnServerStarted -= OnServerConnected;
         networkManager.OnClientDisconnectCallback += ClientDisconnection;
         connectionPanel.SetActive(false);
+#if UNITY_ANDROID
+        Joystick.SetActive(true);
+#endif
         isConnecting = false;
     }
 
@@ -105,6 +116,9 @@ public class UIConnectionManager : MonoBehaviour
         networkManager.OnClientDisconnectCallback -= ClientDisconnection;
         connectingText.text = ConnectionStatusTexts[0];
         connectionPanel.SetActive(true);
+#if UNITY_ANDROID
+        Joystick.SetActive(false);
+#endif
         networkDiscovery.StopDiscovery();
         isConnecting = false;
     }
