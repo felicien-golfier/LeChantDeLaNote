@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -13,16 +14,22 @@ public class SpawnManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InvokeRepeating("SpawnEnnemy", startDelay, spawnInterval);
+        NetworkManager.Singleton.OnServerStarted += OnServerStart;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+     
     }
 
     // Spawn an animal
+    
+    void OnServerStart()
+    { 
+        InvokeRepeating("SpawnEnnemy", startDelay, spawnInterval);
+    }
+
     void SpawnEnnemy()
     {
     
@@ -36,8 +43,14 @@ public class SpawnManager : MonoBehaviour
     // Function to spawn animal on top of the scene
     void Spawn()
     {
-        float posX = Random.Range(0, Tools.limitX);
-        float posY = Random.Range(0, Tools.limitY);
+        if (ennemiPrefabs.Length == 0)
+        {
+            Debug.LogError("No ennemi prefabs");
+            return;
+        }
+ 
+        float posX = Random.Range(-Tools.limitX, Tools.limitX);
+        float posY = Random.Range(-Tools.limitY, Tools.limitY);
         Vector3 position = new Vector3(posX, posY, 0);
         int ennemiIndex = Random.Range(0, ennemiPrefabs.Length);
         Instantiate(ennemiPrefabs[ennemiIndex], position, Quaternion.identity);

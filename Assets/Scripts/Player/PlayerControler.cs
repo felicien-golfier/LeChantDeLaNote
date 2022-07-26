@@ -12,11 +12,6 @@ public class PlayerControler : MonoBehaviour
     private float verticalInput;
     private string[] direction;
 
-    // Useless for now
-    private readonly float limitX = 20.0f;
-    private readonly float limitZUp = 15.0f;
-    private readonly float limitZDown = 0.0f;
-
     private bool isLocalPlayer = false;
 
 
@@ -37,7 +32,7 @@ public class PlayerControler : MonoBehaviour
     {
         if (!isLocalPlayer)
             return;
-#if UNITY_ANDROID
+#if UNITY_ANDROID||UNITY_EDITOR
         horizontalInput = Joystick.InputDirection.x;
         verticalInput = Joystick.InputDirection.y;
 #else
@@ -50,6 +45,8 @@ public class PlayerControler : MonoBehaviour
             return;
 
         UpdateTransform();
+
+       
     }
 
     private void UpdateTransform()

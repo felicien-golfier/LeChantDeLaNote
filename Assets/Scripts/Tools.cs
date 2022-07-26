@@ -7,9 +7,10 @@ using UnityEngine;
 public class Tools : MonoBehaviour
 {
 
-    public readonly static int limitY = 50;
-    public readonly static int limitX = 100;
+    public readonly static int limitY = 42;
+    public readonly static int limitX = 34;
     public readonly static int maxEnnemy = 5;
+    public readonly static int zCamera = -10;
 
     private static Tools _instance;
     public static Tools instance
