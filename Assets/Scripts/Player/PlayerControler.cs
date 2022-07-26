@@ -14,10 +14,17 @@ public class PlayerControler : NetworkBehaviour
 
     private bool isLocalPlayer = false;
 
+    private Vector2 sizeHitbox;
+    private Vector2 posHitbox;
 
     // Start is called before the first frame update
     void Start()
     {
+
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        sizeHitbox = collider.size;
+        posHitbox = collider.offset;
+
         Joystick = VJHandler.instance;
         Color playercolor = new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
         foreach (SpriteRenderer sr in GetComponentsInChildren<SpriteRenderer>())
@@ -49,17 +56,25 @@ public class PlayerControler : NetworkBehaviour
        
     }
 
+
+
     private void UpdateTransform()
     {
-        Vector3 oldPos = transform.position;
         float frameSpeed = Time.deltaTime * speed;
         Vector3 frameTranslation = new Vector3(frameSpeed * horizontalInput, frameSpeed * verticalInput, 0);
         float acos = Mathf.Acos(frameTranslation.normalized.x);
         float sign = Mathf.Sign(Mathf.Sin(frameTranslation.normalized.y));
-        float radAngle = acos * sign;
         float rotation = Mathf.Rad2Deg * acos * sign - 90;
+        
         transform.rotation = Quaternion.Euler(0f, 0f, rotation);
-        transform.position = transform.position + frameTranslation;
+        Vector3 newPosition = transform.position + frameTranslation;
+
+        // Checking the position of the player regarding the limits and stopping the displacement if required
+        int? testPosX = TouchLimitX(newPosition);
+        int? testPosY = TouchLimitY(newPosition);
+        newPosition = new Vector3(testPosX == null ? transform.position.x + frameTranslation.x : (Tools.limitX - (posHitbox[0] + sizeHitbox[0] / 2) - 1) * testPosX.Value, testPosY == null ? transform.position.y + frameTranslation.y : (Tools.limitY - (posHitbox[1] + sizeHitbox[1] / 2) - 1) * testPosY.Value, 0);
+
+        transform.position = newPosition;
 
         if (IsHost)
         {
@@ -86,5 +101,17 @@ public class PlayerControler : NetworkBehaviour
 
         transform.rotation = Quaternion.Euler(0f, 0f, Orientation);
         transform.position = Position;
+    }
+
+    int? TouchLimitX(Vector3 positionPlayer)
+    {
+        bool res = Math.Abs(positionPlayer.x) + posHitbox[0] + sizeHitbox[0] / 2 + 1 >= Tools.limitX;
+        return res ? Math.Sign(positionPlayer.x) : null;
+    }
+
+    int? TouchLimitY(Vector3 positionPlayer)
+    {
+        bool res = Math.Abs(positionPlayer.y) + posHitbox[1] + sizeHitbox[1] / 2 + 1 >= Tools.limitY;
+        return res ? Math.Sign(positionPlayer.y) : null;
     }
 };
