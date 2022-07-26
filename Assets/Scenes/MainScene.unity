@@ -1814,7 +1814,12 @@ MonoBehaviour:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 1417887819}
     PlayerPrefab: {fileID: 6438529280462786797, guid: 2af27c6d0c20e444487f21a02402308a, type: 3}
-    NetworkPrefabs: []
+    NetworkPrefabs:
+    - Override: 0
+      Prefab: {fileID: 1547314041125689420, guid: 62063c600026bd640bfe878699f37d7f, type: 3}
+      SourcePrefabToOverride: {fileID: 0}
+      SourceHashToOverride: 0
+      OverridingTargetPrefab: {fileID: 0}
     TickRate: 30
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0
@@ -2075,7 +2080,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ennemiPrefabs:
   - {fileID: 1547314041125689420, guid: 62063c600026bd640bfe878699f37d7f, type: 3}
-  - {fileID: 881638217163530622, guid: e8c8abda56534044abe500d26d33b376, type: 3}
   maxEnnemies: 5
 --- !u!4 &1683196139
 Transform:

@@ -11,6 +11,7 @@ public class Tools : MonoBehaviour
     public readonly static int limitX = 34;
     public readonly static int maxEnnemy = 5;
     public readonly static int zCamera = -10;
+    public readonly static float AggroSquaredDist = 64;
 
     private static Tools _instance;
     public static Tools instance
@@ -35,6 +36,10 @@ public class Tools : MonoBehaviour
         go.SetActive(false);
     }
 
+    public static float SquaredDist(Vector2 v1, Vector2 v2)
+    {
+        return (v1.x - v2.x) * (v1.x - v2.x) + (v1.y - v2.y) * (v1.y - v2.y);
+    }
     public static IEnumerator RoutineCallFunctionNextFrame(Action Func)
     {
         yield return new WaitForEndOfFrame();
