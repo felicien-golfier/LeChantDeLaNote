@@ -6,6 +6,9 @@ using System;
 
 public class PlayerControler : NetworkBehaviour
 {
+    public GameObject projectilePrefab;
+    public Vector2 orientationVector;
+
     public float speed = 15.0f;
     private VJHandler Joystick;
     private float horizontalInput;
@@ -48,31 +51,43 @@ public class PlayerControler : NetworkBehaviour
         verticalInput = Input.GetAxis("Vertical");
 #endif
 
+        
+        Vector3 frameTranslation = new Vector3(horizontalInput,verticalInput, 0);
+        orientationVector = frameTranslation.normalized;
+
         if (verticalInput == 0 && horizontalInput == 0)
             return;
 
-        UpdateTransform();
+        UpdateTransform(orientationVector, frameTranslation);
 
-       
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Vector3 foodSpawn = new Vector3(transform.position.x, transform.position.y, 0);
+            GameObject projectile = Instantiate(projectilePrefab, foodSpawn, projectilePrefab.transform.rotation);
+            projectile.GetComponent<ProjectileBehavior>().player = gameObject;
+        }
+
+
     }
 
 
 
-    private void UpdateTransform()
+    private void UpdateTransform(Vector2 orientation, Vector3 frameTrans)
     {
-        float frameSpeed = Time.deltaTime * speed;
-        Vector3 frameTranslation = new Vector3(frameSpeed * horizontalInput, frameSpeed * verticalInput, 0);
-        float acos = Mathf.Acos(frameTranslation.normalized.x);
-        float sign = Mathf.Sign(Mathf.Sin(frameTranslation.normalized.y));
-        float rotation = Mathf.Rad2Deg * acos * sign - 90;
         
+
+        float acos = Mathf.Acos(orientation.x);
+        float sign = Mathf.Sign(Mathf.Sin(orientation.y));
+        float rotation = Mathf.Rad2Deg * acos * sign - 90;
+        frameTrans *= Time.deltaTime * speed;
+
         transform.rotation = Quaternion.Euler(0f, 0f, rotation);
-        Vector3 newPosition = transform.position + frameTranslation;
+        Vector3 newPosition = transform.position + frameTrans;
 
         // Checking the position of the player regarding the limits and stopping the displacement if required
         int? testPosX = TouchLimitX(newPosition);
         int? testPosY = TouchLimitY(newPosition);
-        newPosition = new Vector3(testPosX == null ? transform.position.x + frameTranslation.x : (Tools.limitX - (posHitbox[0] + sizeHitbox[0] / 2) - 1) * testPosX.Value, testPosY == null ? transform.position.y + frameTranslation.y : (Tools.limitY - (posHitbox[1] + sizeHitbox[1] / 2) - 1) * testPosY.Value, 0);
+        newPosition = new Vector3(testPosX == null ? transform.position.x + frameTrans.x : (Tools.limitX - (posHitbox[0] + sizeHitbox[0] / 2) - 1) * testPosX.Value, testPosY == null ? transform.position.y + frameTrans.y : (Tools.limitY - (posHitbox[1] + sizeHitbox[1] / 2) - 1) * testPosY.Value, 0);
 
         transform.position = newPosition;
 
