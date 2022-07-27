@@ -53,7 +53,8 @@ public class SpawnManager : MonoBehaviour
         float posY = Random.Range(-Tools.limitY, Tools.limitY);
         Vector3 position = new Vector3(posX, posY, 0);
         int ennemiIndex = Random.Range(0, ennemiPrefabs.Length);
-        Instantiate(ennemiPrefabs[ennemiIndex], position, Quaternion.identity);
+        GameObject ennemy = Instantiate(ennemiPrefabs[ennemiIndex], position, Quaternion.identity);
+        ennemy.GetComponent<NetworkObject>().Spawn();
     }
 }
 
