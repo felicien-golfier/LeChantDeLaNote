@@ -6,7 +6,6 @@ using Unity.Netcode;
 public class SpawnManager : MonoBehaviour
 {
     public GameObject[] ennemiPrefabs;
-    public int maxEnnemies = 5;
     private float startDelay = 2.0f;
     private float spawnInterval = 3.0f;
     private int nbEnnemy = 1;

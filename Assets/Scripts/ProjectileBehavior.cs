@@ -6,23 +6,23 @@ public class ProjectileBehavior : MonoBehaviour
 {
 
     public float projectileSpeed = 10.0f;
-    public float projectileRange = 20f;
+    public float projectileRange = 5.0f;
     private float projectileLifeTime;
     public GameObject player;
-    private Vector2 direction;
+    private float playerAngle;
 
     // Start is called before the first frame update
     void Start()
     {
-        direction = player.GetComponent<PlayerControler>().orientationVector;
+        playerAngle = player.GetComponent<PlayerControler>().playerAngle;
         projectileLifeTime =  projectileRange/ projectileSpeed;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if (Mathf.Pow(player.transform.position.x - transform.position.x,2) + Mathf.Pow(player.transform.position.y - transform.position.y,2) >= projectileRange)
         StartCoroutine(Tools.RoutineCallFunctionAfterTime(Destroy, gameObject, projectileLifeTime));
-        transform.Translate(projectileSpeed * Time.deltaTime * direction);
+        Vector2 newProjectilePosition = new Vector2(-Mathf.Sin(playerAngle*Mathf.PI/180), Mathf.Cos(playerAngle * Mathf.PI / 180));
+        transform.Translate(projectileSpeed * Time.deltaTime * newProjectilePosition);
     }
 }

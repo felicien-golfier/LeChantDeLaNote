@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 3018570196844382384}
   - component: {fileID: 7230516782110172455}
   - component: {fileID: 1699955440113429580}
-  - component: {fileID: -1939143076750608912}
   - component: {fileID: 1687175624663257688}
+  - component: {fileID: 6116426442460329017}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -118,34 +118,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 6538661746489831961, guid: ea2c307048d87954eba044e2fb20b7b3, type: 3}
-  orientationVector: {x: 0, y: 0}
-  speed: 20
---- !u!61 &-1939143076750608912
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6438529280462786797}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1}
-  m_EdgeRadius: 0
+  playerAngle: 0
+  playerSpeed: 15
 --- !u!114 &1687175624663257688
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -158,6 +132,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4855635d4842a6445978a80b85a3abeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!58 &6116426442460329017
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6438529280462786797}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.5
 --- !u!1 &9010971100973758138
 GameObject:
   m_ObjectHideFlags: 0
