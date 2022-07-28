@@ -55,17 +55,19 @@ public class PlayerControler : NetworkBehaviour
         Vector3 frameTranslation = new Vector3(horizontalInput,verticalInput, 0);
         orientationVector = frameTranslation.normalized;
 
-        if (verticalInput == 0 && horizontalInput == 0)
-            return;
-
-        UpdateTransform(orientationVector, frameTranslation);
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Vector3 foodSpawn = new Vector3(transform.position.x, transform.position.y, 0);
             GameObject projectile = Instantiate(projectilePrefab, foodSpawn, projectilePrefab.transform.rotation);
             projectile.GetComponent<ProjectileBehavior>().player = gameObject;
         }
+
+        if (verticalInput == 0 && horizontalInput == 0)
+            return;
+
+        UpdateTransform(orientationVector, frameTranslation);
+
+
 
 
     }
