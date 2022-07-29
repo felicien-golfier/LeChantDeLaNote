@@ -64,15 +64,33 @@ public class PlayerControler : NetworkBehaviour
         // Projectile Spawn
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Vector3 offsetSpawn = new Vector3(-Mathf.Sin(playerAngle*Mathf.PI/180), Mathf.Cos(playerAngle * Mathf.PI / 180), 0);
-            GameObject projectile = Instantiate(projectilePrefab, hitBoxRadius * offsetSpawn + transform.position, projectilePrefab.transform.rotation);
-            projectile.GetComponent<ProjectileBehavior>().player = gameObject;
+            LaunchProjectile();
         }
 
         // Player movement handling
         if (verticalInput == 0 && horizontalInput == 0)
             return;
         UpdateTransform();
+    }
+
+    public void LaunchProjectile()
+    {
+        LaunchProjectileLocal();
+        if (NetworkManager.Singleton.IsHost)
+        {
+            LaunchProjClientRpc();
+        }
+        else
+        {
+            LaunchProjServerRpc();
+        }
+    }
+
+    private void LaunchProjectileLocal()
+    {
+        Vector3 offsetSpawn = new Vector3(-Mathf.Sin(playerAngle * Mathf.PI / 180), Mathf.Cos(playerAngle * Mathf.PI / 180), 0);
+        GameObject projectile = Instantiate(projectilePrefab, hitBoxRadius * offsetSpawn + transform.position, projectilePrefab.transform.rotation);
+        projectile.GetComponent<ProjectileBehavior>().player = gameObject;
     }
 
 
@@ -124,6 +142,18 @@ public class PlayerControler : NetworkBehaviour
         transform.position = Position;
     }
 
+    [ClientRpc]
+    public void LaunchProjClientRpc()
+    {
+        if (!IsLocalPlayer)
+            LaunchProjectileLocal();
+    }
+    [ServerRpc]
+    public void LaunchProjServerRpc()
+    {
+        LaunchProjClientRpc();
+    }
+
     // Player border handling
     int? TouchLimitX(Vector2 positionPlayer)
     {
@@ -136,4 +166,4 @@ public class PlayerControler : NetworkBehaviour
         bool res = Math.Abs(positionPlayer.y) + hitBoxRadius + 0.7f >= Tools.limitY;
         return res ? Math.Sign(positionPlayer.y) : null;
     }
-};
+}

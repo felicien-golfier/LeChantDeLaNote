@@ -20,6 +20,9 @@ public class EnemyBehavior : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!networkManager.IsHost)
+            return;
+
         GetTarget();
         if (target != null)
         {

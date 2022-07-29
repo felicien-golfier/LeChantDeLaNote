@@ -8,7 +8,7 @@ public class SpawnManager : MonoBehaviour
     public GameObject[] ennemiPrefabs;
     private float startDelay = 2.0f;
     private float spawnInterval = 3.0f;
-    private int nbEnnemy = 1;
+    private uint nbEnnemy = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -31,8 +31,7 @@ public class SpawnManager : MonoBehaviour
 
     void SpawnEnnemy()
     {
-    
-        if (nbEnnemy <= Tools.maxEnnemy)
+        if (NetworkManager.Singleton.IsHost && nbEnnemy <= Tools.maxEnnemy)
         { 
             Spawn();
             nbEnnemy += 1;

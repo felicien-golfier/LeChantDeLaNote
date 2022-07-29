@@ -9,8 +9,8 @@ public class UIConnectionManager : MonoBehaviour
 {
     [Header("Connection Interface")]
     public TMPro.TextMeshProUGUI connectingText;
-    public GameObject connectionPanel;
-    public GameObject Joystick;
+    public GameObject[] ToDisplayWhenConnected;
+    public GameObject[] ToDisplayWhenDisconnected;
 
     private bool isConnecting = false;
     private string[] ConnectionStatusTexts = { "Not Connected", "Connected as CLIENT", "Connected as HOST", "Connection..." };
@@ -27,8 +27,7 @@ public class UIConnectionManager : MonoBehaviour
         }
         connectingText.text = ConnectionStatusTexts[0];
         networkDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
-
-        Joystick.SetActive(false);
+        OnChangeConnection(false);
     }
 
     public void StartClientConnection()
@@ -81,13 +80,24 @@ public class UIConnectionManager : MonoBehaviour
             networkManager.OnClientConnectedCallback -= OnClientConnected;
             networkManager.OnClientDisconnectCallback += ClientDisconnection;
 
-#if UNITY_ANDROID || UNITY_EDITOR
-            Joystick.SetActive(true);
-#endif
-            connectionPanel.SetActive(false);
-            isConnecting = false;
+            OnChangeConnection(true);
         }
     }
+
+    private void OnChangeConnection(bool connect)
+    {
+        foreach (var go in ToDisplayWhenConnected)
+        {
+            go.SetActive(connect);
+        }
+        foreach (var go in ToDisplayWhenDisconnected)
+        {
+            go.SetActive(!connect);
+        }
+
+        isConnecting = false;
+    }
+
     private void OnServerConnected()
     {
         Debug.Log("Host connected with address " + Tools.GetLocalIPv4());
@@ -95,11 +105,7 @@ public class UIConnectionManager : MonoBehaviour
         connectingText.text = ConnectionStatusTexts[2];
         networkManager.OnServerStarted -= OnServerConnected;
         networkManager.OnClientDisconnectCallback += ClientDisconnection;
-        connectionPanel.SetActive(false);
-#if UNITY_ANDROID || UNITY_EDITOR
-        Joystick.SetActive(true);
-#endif
-        isConnecting = false;
+        OnChangeConnection(true);
     }
 
     private void ClientDisconnection(ulong id)
@@ -114,11 +120,13 @@ public class UIConnectionManager : MonoBehaviour
     {
         networkManager.OnClientDisconnectCallback -= ClientDisconnection;
         connectingText.text = ConnectionStatusTexts[0];
-        connectionPanel.SetActive(true);
-#if UNITY_ANDROID || UNITY_EDITOR
-        Joystick.SetActive(false);
-#endif
         networkDiscovery.StopDiscovery();
-        isConnecting = false;
+        OnChangeConnection(false);
+
+    }
+
+    public void FireButton()
+    {
+        networkManager.LocalClient.PlayerObject.GetComponent<PlayerControler>().LaunchProjectile();
     }
 }

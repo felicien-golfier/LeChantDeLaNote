@@ -1,43 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 public class DetectCollision : MonoBehaviour
 {
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-    //private void OnCollisionEnter2D(Collision2D other)
-    //{
-    //    //Debug.Log(gameObject.tag);
-
-    //    if (other.gameObject.CompareTag("Projectile"))
-    //    {
-    //        if (gameObject.tag == "Ennemy")
-    //        {
-    //            Destroy(other.gameObject);
-    //            Destroy(gameObject);
-    //        }
-    //    }
-    //}
     void OnTriggerEnter2D(Collider2D other)
     {
-        //Debug.Log(gameObject.tag);
+        if (!NetworkManager.Singleton.IsHost || !other.CompareTag("Projectile") || gameObject == other.GetComponent<ProjectileBehavior>().player)
+            return;
 
-        if (other.CompareTag("Projectile"))
+        if (gameObject.tag == "Player")
         {
-            if (gameObject.tag == "Ennemy")
-            {
-                Destroy(other.gameObject);
-                Destroy(gameObject);
-            }
+            Destroy(other.gameObject);
+            ScoreManager.AddScore(5);
         }
+        else if (gameObject.tag == "Ennemy")
+        {
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+            ScoreManager.AddScore(1);
+        }
+        
     }
 }
