@@ -88,7 +88,8 @@ public class PlayerControler : NetworkBehaviour
     private void LaunchProjectileLocal()
     {
         Vector3 offsetSpawn = new Vector3(-Mathf.Sin(playerAngle * Mathf.PI / 180), Mathf.Cos(playerAngle * Mathf.PI / 180), 0);
-        GameObject projectile = Instantiate(projectilePrefab, hitBoxRadius * offsetSpawn + transform.position, projectilePrefab.transform.rotation);
+        Quaternion angleSpawn = Quaternion.Euler(0f, 0f, playerAngle);
+        GameObject projectile = Instantiate(projectilePrefab, hitBoxRadius * offsetSpawn + transform.position, angleSpawn);
         projectile.GetComponent<ProjectileBehavior>().player = gameObject;
     }
 

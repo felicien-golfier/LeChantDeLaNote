@@ -6,6 +6,7 @@ using Unity.Netcode;
 public class EnemyBehavior : MonoBehaviour
 {
 
+    public Animator animator;
     public float speed = 25; 
 
     NetworkManager networkManager;
@@ -23,10 +24,13 @@ public class EnemyBehavior : MonoBehaviour
         if (!networkManager.IsHost)
             return;
 
+        animator.SetFloat("ennemyMovmentSpeed", 0.0f);
+
         GetTarget();
         if (target != null)
         {
             MoveToTarget();
+            animator.SetFloat("ennemyMovmentSpeed", 2.0f);
         }
     }
 

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: -455701919460955801}
   - component: {fileID: -5355997266310591255}
   - component: {fileID: -5833965025731729165}
+  - component: {fileID: 3856890484766293323}
   m_Layer: 0
   m_Name: Ennemy
   m_TagString: Ennemy
@@ -78,7 +79,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  m_Sprite: {fileID: -1844067463, guid: aefe086393f68464ca5026120afa0588, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -143,6 +144,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2456c25cd128c0b4ab74ff6a8fa2e6a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animator: {fileID: 3856890484766293323}
   speed: 2
 --- !u!61 &-5355997266310591255
 BoxCollider2D:
@@ -157,18 +159,18 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.04739386, y: -0.10155827}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 1.6, y: 1.6}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.2933906, y: 1.392692}
   m_EdgeRadius: 0
 --- !u!114 &-5833965025731729165
 MonoBehaviour:
@@ -182,3 +184,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4855635d4842a6445978a80b85a3abeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!95 &3856890484766293323
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1547314041125689420}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b71a2e09af6617240865ba26c5530328, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
