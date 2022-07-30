@@ -10,8 +10,7 @@ public class ScoreManager : NetworkBehaviour
     public TMPro.TMP_Text ScoreTxtPrefab;
     private Dictionary<ulong, TMPro.TMP_Text> playersScoreTxt = new Dictionary<ulong, TMPro.TMP_Text>();
     private Dictionary<ulong, GameObject> players = new Dictionary<ulong, GameObject>();
-    public RectTransform FirstPlayerPointer;
-    private GameObject firstPlayer = null;
+    public GameObject firstPlayer = null;
     private static ScoreManager _instance;
     public static ScoreManager instance
     {
@@ -56,7 +55,7 @@ public class ScoreManager : NetworkBehaviour
         if (playersScoreTxt.Count == 0)
             return;
 
-        var sortedPlayers = from entry in playersScoreTxt orderby int.Parse(entry.Value.text) ascending select entry;
+        var sortedPlayers = from entry in playersScoreTxt orderby int.Parse(entry.Value.text) descending select entry;
         playersScoreTxt = sortedPlayers.ToDictionary(x => x.Key, x => x.Value);
         uint ind = 0;
         foreach (var player in playersScoreTxt)
@@ -67,19 +66,6 @@ public class ScoreManager : NetworkBehaviour
         if (players.ContainsKey(playersScoreTxt.First().Key))
         {
             firstPlayer = players[playersScoreTxt.First().Key];
-        }
-
-        var myPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.gameObject;
-        if (firstPlayer == null || myPlayer == firstPlayer)
-        {
-            FirstPlayerPointer.anchoredPosition = new Vector2(0, Camera.main.pixelHeight / 10);
-            FirstPlayerPointer.transform.rotation = new Quaternion(0,0,0.7071f, 0.7071f);
-        }
-        else
-        {
-            var VectorToFirstPlayer = firstPlayer.transform.position - myPlayer.transform.position;
-            FirstPlayerPointer.GetComponent<RectTransform>().anchoredPosition = VectorToFirstPlayer.normalized*Camera.main.pixelHeight;
-            FirstPlayerPointer.transform.LookAt(myPlayer.transform.position);
         }
     }
 
@@ -106,6 +92,7 @@ public class ScoreManager : NetworkBehaviour
     public void AddScore(int delta, ulong clientId, GameObject givenPlayer = null)
     {
         players.TryAdd(clientId, givenPlayer);
+        Debug.Log(IsSpawned);
         if (NetworkManager.Singleton.IsHost)
         {
             AddScoreClientRpc(delta, clientId);

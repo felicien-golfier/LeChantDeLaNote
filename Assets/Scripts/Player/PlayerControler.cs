@@ -11,6 +11,8 @@ public class PlayerControler : NetworkBehaviour
     public float playerAngle;
     public float playerSpeed = 15.0f;
     public Animator animator;
+    public GameObject FirstPlayerPointer;
+    public float distToArrow = 2f;
 
     // Private in game usefull variable
     private float hitBoxRadius;
@@ -23,6 +25,10 @@ public class PlayerControler : NetworkBehaviour
 
     void Start()
     {
+        // Set arrow
+        FirstPlayerPointer = transform.GetChild(0).gameObject;
+        FirstPlayerPointer.SetActive(IsLocalPlayer);
+
         // Getting hitbox characteristics
         CircleCollider2D collider = GetComponent<CircleCollider2D>();
         hitBoxRadius = collider.radius;
@@ -45,6 +51,7 @@ public class PlayerControler : NetworkBehaviour
             return;
         }
 
+        UpdatePlayerPointer();
         // Taking care of the support we play on
         horizontalInput = Joystick.InputDirection.x;
         verticalInput = Joystick.InputDirection.y;
@@ -69,7 +76,8 @@ public class PlayerControler : NetworkBehaviour
             return;
         }
         else if (verticalInput != 0 || horizontalInput != 0)
-            UpdateTransform();        
+            UpdateTransform();
+
     }
 
     public void LaunchProjectile()
@@ -167,5 +175,21 @@ public class PlayerControler : NetworkBehaviour
     {
         bool res = Math.Abs(positionPlayer.y) + hitBoxRadius + 0.7f >= Tools.limitY;
         return res ? Math.Sign(positionPlayer.y) : null;
+    }
+
+    private void UpdatePlayerPointer()
+    {
+        GameObject firstPlayer = ScoreManager.instance.firstPlayer;
+        if (firstPlayer == null || gameObject == firstPlayer)
+        {
+            FirstPlayerPointer.transform.localPosition = new Vector2(0, distToArrow);
+            FirstPlayerPointer.transform.rotation = new Quaternion(0,0,0.7071f, 0.7071f);
+        }
+        else
+        {
+            var VectorToFirstPlayer = firstPlayer.transform.position - transform.position;
+            FirstPlayerPointer.transform.localPosition = VectorToFirstPlayer.normalized * distToArrow;
+            FirstPlayerPointer.transform.rotation = Quaternion.Euler(0,0,Mathf.Rad2Deg * Mathf.Sign(Mathf.Sin(VectorToFirstPlayer.normalized.y)) * Mathf.Acos(VectorToFirstPlayer.normalized.x) +180);
+        }
     }
 }
