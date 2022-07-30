@@ -5,11 +5,13 @@ using UnityEngine;
 using Unity.Netcode;
 using TMPro;
 
-public class ScoreManager : MonoBehaviour
+public class ScoreManager : NetworkBehaviour
 {
     public TMPro.TMP_Text ScoreTxtPrefab;
-    private Dictionary<ulong, TMPro.TMP_Text> players = new Dictionary<ulong, TMPro.TMP_Text>();
-    
+    private Dictionary<ulong, TMPro.TMP_Text> playersScoreTxt = new Dictionary<ulong, TMPro.TMP_Text>();
+    private Dictionary<ulong, GameObject> players = new Dictionary<ulong, GameObject>();
+    public RectTransform FirstPlayerPointer;
+    private GameObject firstPlayer = null;
     private static ScoreManager _instance;
     public static ScoreManager instance
     {
@@ -24,20 +26,23 @@ public class ScoreManager : MonoBehaviour
         _instance = this;
     }
 
-
     private void OnDisable()
     {
-
-        if(NetworkManager.Singleton)
-            NetworkManager.Singleton.OnClientConnectedCallback += OnConnection;
+        if(NetworkManager.Singleton && NetworkManager.Singleton.IsHost)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnConnection;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnDisconnection;
+            OnDisconnection(NetworkManager.Singleton.LocalClientId);
+        }
     }
     private void OnEnable()
     {
-        if (NetworkManager.Singleton)
+        if (NetworkManager.Singleton && NetworkManager.Singleton.IsHost)
         {
             NetworkManager.Singleton.OnClientConnectedCallback += OnConnection;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnection;
 
-            if (NetworkManager.Singleton.ConnectedClients.Count > 0)
+            if (NetworkManager.Singleton.LocalClient != null)
             {
                 foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
                     OnConnection(clientId);
@@ -48,35 +53,98 @@ public class ScoreManager : MonoBehaviour
     // Update is called once per frame
     void LateUpdate()
     {
-        var sortedPlayers = from entry in players orderby int.Parse(entry.Value.text) ascending select entry;
-        players = sortedPlayers.ToDictionary(x => x.Key, x => x.Value);
+        if (playersScoreTxt.Count == 0)
+            return;
+
+        var sortedPlayers = from entry in playersScoreTxt orderby int.Parse(entry.Value.text) ascending select entry;
+        playersScoreTxt = sortedPlayers.ToDictionary(x => x.Key, x => x.Value);
         uint ind = 0;
-        foreach (var player in players)
+        foreach (var player in playersScoreTxt)
         {
-            player.Value.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, ind++ * -20);
+            player.Value.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, ind++ * - Camera.main.pixelHeight / 25);
         }
-    }
 
-    public static void AddScore(uint delta)
-    {
-        TMPro.TMP_Text PlayerText;
-
-        if (instance.players.TryGetValue(NetworkManager.Singleton.LocalClientId, out PlayerText))
+        if (players.ContainsKey(playersScoreTxt.First().Key))
         {
-            PlayerText.text = (uint.Parse(PlayerText.text) + delta).ToString();
+            firstPlayer = players[playersScoreTxt.First().Key];
+        }
+
+        var myPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.gameObject;
+        if (firstPlayer == null || myPlayer == firstPlayer)
+        {
+            FirstPlayerPointer.anchoredPosition = new Vector2(0, Camera.main.pixelHeight / 10);
+            FirstPlayerPointer.transform.rotation = new Quaternion(0,0,0.7071f, 0.7071f);
         }
         else
         {
-            Debug.LogError("The client with ID " + NetworkManager.Singleton.LocalClientId + " does not exist in the Players array !!");
-            instance.CreateAndAddText(NetworkManager.Singleton.LocalClientId, delta);
+            var VectorToFirstPlayer = firstPlayer.transform.position - myPlayer.transform.position;
+            FirstPlayerPointer.GetComponent<RectTransform>().anchoredPosition = VectorToFirstPlayer.normalized*Camera.main.pixelHeight;
+            FirstPlayerPointer.transform.LookAt(myPlayer.transform.position);
         }
     }
 
+    [ClientRpc]
+    private void AddScoreClientRpc(int delta, ulong clientId)
+    {
+        if (!IsLocalPlayer)
+            AddScoreLocal(delta, clientId);
+    }
+    private void AddScoreLocal(int delta, ulong clientId)
+    {
+        TMPro.TMP_Text PlayerText;
+
+        if (playersScoreTxt.TryGetValue(clientId, out PlayerText))
+        {
+            PlayerText.text = (int.Parse(PlayerText.text) + delta).ToString();
+        }
+        else
+        {
+            Debug.LogError("The client with ID " + clientId + " does not exist in the Players array !!");
+            CreateAndAddText(clientId, delta);
+        }
+    }
+    public void AddScore(int delta, ulong clientId, GameObject givenPlayer = null)
+    {
+        players.TryAdd(clientId, givenPlayer);
+        if (NetworkManager.Singleton.IsHost)
+        {
+            AddScoreClientRpc(delta, clientId);
+            AddScoreLocal(delta, clientId);
+        }
+    }
+
+    private void OnDisconnection(ulong clientID)
+    {
+        if (clientID == NetworkManager.Singleton.LocalClientId)
+        {
+            foreach(var  playerTxt in playersScoreTxt)
+            {
+                Destroy(playerTxt.Value.gameObject);
+            }
+            playersScoreTxt.Clear();
+            players.Clear();
+        }
+        else
+        {
+            TMPro.TMP_Text newScoreTxt;
+            if (playersScoreTxt.TryGetValue(clientID, out newScoreTxt))
+            {
+                playersScoreTxt.Remove(clientID);
+                Destroy(newScoreTxt);
+            }
+
+            GameObject player;
+            if (players.TryGetValue(clientID, out player))
+            {
+                players.Remove(clientID);
+            }
+        }
+    }
     private void OnConnection(ulong clientID)
     {
         TMPro.TMP_Text newScoreTxt;
 
-        if (players.TryGetValue(clientID, out newScoreTxt))
+        if (playersScoreTxt.TryGetValue(clientID, out newScoreTxt))
         {
             newScoreTxt.gameObject.SetActive(true);
         }
@@ -86,7 +154,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
-    private TMP_Text CreateAndAddText(ulong clientID, uint score = 0)
+    private TMP_Text CreateAndAddText(ulong clientID, int score = 0)
     {
         TMP_Text newScoreTxt = Instantiate(ScoreTxtPrefab);
         newScoreTxt.transform.SetParent(gameObject.transform);
@@ -94,7 +162,8 @@ public class ScoreManager : MonoBehaviour
         newScoreTxt.GetComponent<RectTransform>().offsetMax = Vector2.zero;
         newScoreTxt.GetComponent<RectTransform>().localScale = Vector3.one;
         newScoreTxt.text = score.ToString();
-        players.Add(clientID, newScoreTxt);
+        newScoreTxt.transform.GetChild(0).GetComponent<TMP_Text>().text = "Player " + clientID;
+        playersScoreTxt.Add(clientID, newScoreTxt);
         return newScoreTxt;
     }
 }

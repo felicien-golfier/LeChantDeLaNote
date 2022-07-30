@@ -6,23 +6,28 @@ using Unity.Netcode;
 public class SpawnManager : MonoBehaviour
 {
     public GameObject[] ennemiPrefabs;
-    private float startDelay = 2.0f;
-    private float spawnInterval = 3.0f;
+    public float startDelay = 2.0f;
+    public float spawnInterval = 3.0f;
+    public uint maxEnnemy = 20;
     private uint nbEnnemy = 0;
+    static private SpawnManager _instance;
+    static public SpawnManager instance
+    {
+        get
+        {
+            return _instance;
+        }
+    }
 
     // Start is called before the first frame update
+    void Awake()
+    {
+        _instance = this;
+    }
     void Start()
     {
         NetworkManager.Singleton.OnServerStarted += OnServerStart;
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-     
-    }
-
-    // Spawn an animal
     
     void OnServerStart()
     { 
@@ -31,13 +36,17 @@ public class SpawnManager : MonoBehaviour
 
     void SpawnEnnemy()
     {
-        if (NetworkManager.Singleton.IsHost && nbEnnemy <= Tools.maxEnnemy)
-        { 
+        if (NetworkManager.Singleton.IsHost && nbEnnemy < maxEnnemy)
+        {
             Spawn();
             nbEnnemy += 1;
         }
     }
 
+    public void OnEnnemyDeath()
+    {
+        nbEnnemy--;
+    }
     // Function to spawn animal on top of the scene
     void Spawn()
     {

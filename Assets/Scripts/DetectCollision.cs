@@ -10,17 +10,28 @@ public class DetectCollision : MonoBehaviour
         if (!NetworkManager.Singleton.IsHost || !other.CompareTag("Projectile") || gameObject == other.GetComponent<ProjectileBehavior>().player)
             return;
 
+        GameObject OriginPlayer = other.GetComponent<ProjectileBehavior>().player;
+        ulong ClientId = OriginPlayer.GetComponent<NetworkBehaviour>().OwnerClientId;
         if (gameObject.tag == "Player")
         {
-            Destroy(other.gameObject);
-            ScoreManager.AddScore(5);
+            if (NetworkManager.Singleton.IsHost)
+                Destroy(other.gameObject);
+            else
+                other.gameObject.SetActive(false);
+
+            ScoreManager.instance.AddScore(5, ClientId, OriginPlayer);
         }
         else if (gameObject.tag == "Ennemy")
         {
-            Destroy(other.gameObject);
-            Destroy(gameObject);
-            ScoreManager.AddScore(1);
+            if (NetworkManager.Singleton.IsHost)
+            {
+                Destroy(other.gameObject);
+                Destroy(gameObject);
+            }
+            else
+                other.gameObject.SetActive(false);
+
+            ScoreManager.instance.AddScore(1, ClientId, OriginPlayer);
         }
-        
     }
 }
