@@ -6,8 +6,11 @@ using System;
 
 public class CameraControler : MonoBehaviour
 {
+    public float timeOffset = 0.1f;
+
     private float xSizeCamera;
     private float ySizeCamera;
+    private Vector3 velocity;
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +36,9 @@ public class CameraControler : MonoBehaviour
 
         int? testPosX = TouchLimitX(positionPlayer);
         int? testPosY = TouchLimitY(positionPlayer);
-        Camera.main.transform.position = new Vector3(testPosX==null ? positionPlayer.x : (Tools.limitX - xSizeCamera/2) * testPosX.Value, testPosY == null ? positionPlayer.y : (Tools.limitY - ySizeCamera/2) * testPosY.Value, Tools.zCamera);
+        Vector3 newCameraPositon = new Vector3(testPosX == null ? positionPlayer.x : (Tools.limitX - xSizeCamera / 2) * testPosX.Value, testPosY == null ? positionPlayer.y : (Tools.limitY - ySizeCamera / 2) * testPosY.Value, Tools.zCamera); 
+        Camera.main.transform.position = Vector3.SmoothDamp(Camera.main.transform.position, newCameraPositon, ref velocity, timeOffset);
+            
     }
 
     int? TouchLimitX(Vector3 positionPlayer)

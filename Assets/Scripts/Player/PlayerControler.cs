@@ -10,6 +10,7 @@ public class PlayerControler : NetworkBehaviour
     public GameObject projectilePrefab;
     public float playerAngle;
     public float playerSpeed = 15.0f;
+    public Animator animator;
 
     // Private in game usefull variable
     private float hitBoxRadius;
@@ -67,10 +68,14 @@ public class PlayerControler : NetworkBehaviour
             LaunchProjectile();
         }
 
+
         // Player movement handling
         if (verticalInput == 0 && horizontalInput == 0)
+        { 
+            animator.SetFloat("playerMovmentSpeed", 0.0f);
             return;
-        UpdateTransform();
+        }
+        UpdateTransform();        
     }
 
     public void LaunchProjectile()
@@ -110,12 +115,14 @@ public class PlayerControler : NetworkBehaviour
         Vector2 newPossiblePosition = new Vector2(transform.position.x, transform.position.y) + frameTrans;
 
         // Checking the position of the player regarding the limits and stopping the displacement if required
-        transform.rotation = Quaternion.Euler(0f, 0f, newPlayerAngle);
+        playerAngle = newPlayerAngle;
+        //transform.rotation = Quaternion.Euler(0f, 0f, newPlayerAngle);
         int? testPosX = TouchLimitX(newPossiblePosition);
         int? testPosY = TouchLimitY(newPossiblePosition);
         Vector2 newPosition = new Vector2(testPosX == null ? newPossiblePosition.x : (Tools.limitX - hitBoxRadius - 0.7f) * testPosX.Value, testPosY == null ? newPossiblePosition.y : (Tools.limitY - hitBoxRadius - 0.7f) * testPosY.Value);
 
         transform.position = newPosition;
+        animator.SetFloat("playerMovmentSpeed", Mathf.Sqrt(Mathf.Pow(frameTrans.x, 2) + Mathf.Pow(frameTrans.y, 2)));
 
         // Network
         if (IsHost)

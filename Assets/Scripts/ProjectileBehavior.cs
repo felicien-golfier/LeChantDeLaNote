@@ -12,6 +12,7 @@ public class ProjectileBehavior : MonoBehaviour
     public GameObject player;
     private float playerAngle;
     Vector2 ProjectileForwardVector;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,6 +25,7 @@ public class ProjectileBehavior : MonoBehaviour
     void Update()
     {
         StartCoroutine(Tools.RoutineCallFunctionAfterTime(Destroy, gameObject, projectileLifeTime));
+        transform.rotation = Quaternion.Euler(0f, 0f, playerAngle * Mathf.PI / 180);
         transform.Translate(projectileSpeed * Time.deltaTime * ProjectileForwardVector);
     }
 }
