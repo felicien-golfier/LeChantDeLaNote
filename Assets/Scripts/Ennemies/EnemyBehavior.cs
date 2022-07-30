@@ -30,6 +30,11 @@ public class EnemyBehavior : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        SpawnManager.instance.OnEnnemyDeath();
+    }
+
     private void MoveToTarget()
     {
         float frameSpeed = Time.deltaTime * speed;

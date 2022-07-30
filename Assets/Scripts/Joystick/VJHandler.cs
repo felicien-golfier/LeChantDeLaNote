@@ -6,7 +6,7 @@ public class VJHandler : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointe
     public RectTransform jsContainer;
     public RectTransform joystick;
 
-    public Vector3 InputDirection;
+    public Vector2 InputDirection;
 
     private static VJHandler _instance;
     public static VJHandler instance
@@ -22,24 +22,19 @@ public class VJHandler : MonoBehaviour, IDragHandler, IPointerUpHandler, IPointe
     }
     public void OnDrag(PointerEventData ped)
     {
-        Vector2 position = Vector2.zero;
-
         //To get InputDirection
         RectTransformUtility.ScreenPointToLocalPointInRectangle
                 (jsContainer,
                 ped.position,
                 ped.pressEventCamera,
-                out position);
-
-        float x = position.x;
-        float y = position.y;
-
-        InputDirection = new Vector3(x, y, 0);
+                out InputDirection);
+        InputDirection.x /= GetComponent<RectTransform>().rect.size.x/2;
+        InputDirection.y /= GetComponent<RectTransform>().rect.size.y/2;
         InputDirection = (InputDirection.magnitude > .5f) ? InputDirection.normalized / 2 : InputDirection;
-
         //to define the area in which joystick can move around
-        joystick.anchoredPosition = new Vector3(InputDirection.x, InputDirection.y);
-
+        joystick.anchoredPosition = new Vector3(
+            InputDirection.x*GetComponentInChildren<CircleCollider2D>().radius,
+            InputDirection.y * GetComponentInChildren<CircleCollider2D>().radius);
     }
 
     public void OnPointerDown(PointerEventData ped)

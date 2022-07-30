@@ -19,10 +19,6 @@ public class PlayerControler : NetworkBehaviour
     private VJHandler Joystick;
     private float horizontalInput;
     private float verticalInput;
-    
-    // Network varible
-    private bool isLocalPlayer = false;
-
 
     void Start()
     {
@@ -37,29 +33,26 @@ public class PlayerControler : NetworkBehaviour
         {
             sr.color = playercolor;
         }
-
-        // Network
-        isLocalPlayer = GetComponent<NetworkObject>().IsLocalPlayer;
     }
 
     void Update()
     {
         // Network
-        if (!isLocalPlayer)
+        playerAngle = transform.rotation.eulerAngles.z;
+        if (!IsLocalPlayer)
+        {
             return;
+        }
 
         // Taking care of the support we play on
-#if UNITY_ANDROID||UNITY_EDITOR
         horizontalInput = Joystick.InputDirection.x;
         verticalInput = Joystick.InputDirection.y;
-#else
-        // Moving the player
-        horizontalInput = Input.GetAxis("Horizontal");
-        verticalInput = Input.GetAxis("Vertical");
-#endif
 
-        // Get the angle of the player
-        playerAngle = transform.rotation.eulerAngles.z;
+        if (Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+        {
+            horizontalInput = Input.GetAxis("Horizontal");
+            verticalInput = Input.GetAxis("Vertical");
+        }
         
         // Projectile Spawn
         if (Input.GetKeyDown(KeyCode.Space))
@@ -68,9 +61,8 @@ public class PlayerControler : NetworkBehaviour
         }
 
         // Player movement handling
-        if (verticalInput == 0 && horizontalInput == 0)
-            return;
-        UpdateTransform();
+        if (verticalInput != 0 || horizontalInput != 0)
+            UpdateTransform();
     }
 
     public void LaunchProjectile()
@@ -104,7 +96,7 @@ public class PlayerControler : NetworkBehaviour
         else if ((verticalInput < 0))
             newPlayerAngle = -Mathf.Acos(horizontalInput / (Mathf.Sqrt(Mathf.Pow(horizontalInput, 2) + Mathf.Pow(verticalInput, 2))));
         else
-            newPlayerAngle = transform.rotation.eulerAngles.z;
+            newPlayerAngle = horizontalInput>0 ? 0 : Mathf.PI;
         newPlayerAngle = newPlayerAngle * 180 / Mathf.PI-90;
         Vector2 frameTrans = new Vector2(horizontalInput, verticalInput) * Time.deltaTime * playerSpeed;
         Vector2 newPossiblePosition = new Vector2(transform.position.x, transform.position.y) + frameTrans;
