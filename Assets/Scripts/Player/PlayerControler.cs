@@ -63,17 +63,13 @@ public class PlayerControler : NetworkBehaviour
 
 
         // Player movement handling
-<<<<<<< HEAD
         if (verticalInput == 0 && horizontalInput == 0)
         { 
             animator.SetFloat("playerMovmentSpeed", 0.0f);
             return;
         }
-        UpdateTransform();        
-=======
-        if (verticalInput != 0 || horizontalInput != 0)
-            UpdateTransform();
->>>>>>> origin/felicien
+        else if (verticalInput != 0 || horizontalInput != 0)
+            UpdateTransform();        
     }
 
     public void LaunchProjectile()
