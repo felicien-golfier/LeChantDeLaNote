@@ -15,7 +15,6 @@ public class PlayerControler : NetworkBehaviour
     public float distToArrow = 2f;
     public uint MaxHealth = 5;
     public float DeathTime = 5;
-
     // Private in game usefull variable
     private float hitBoxRadius;
     private float newPlayerAngle = 0.0f;
@@ -89,6 +88,7 @@ public class PlayerControler : NetworkBehaviour
     }
     public void GetHit()
     {
+        SoundManager.instance.PlayDmg(gameObject);
         Health--;
     }
 
@@ -114,6 +114,7 @@ public class PlayerControler : NetworkBehaviour
         SR.color = new Color(SR.color.r, SR.color.g, SR.color.b, 1);
         Health = MaxHealth;
         isDead = false;
+        SoundManager.instance.PlayHeal(gameObject);
     }
 
     public void LaunchProjectile()
@@ -138,6 +139,7 @@ public class PlayerControler : NetworkBehaviour
         Quaternion angleSpawn = Quaternion.Euler(0f, 0f, playerAngle);
         GameObject projectile = Instantiate(projectilePrefab, hitBoxRadius * offsetSpawn + transform.position, angleSpawn);
         projectile.GetComponent<ProjectileBehavior>().player = gameObject;
+        SoundManager.instance.PlayAttack(gameObject);
     }
 
 
