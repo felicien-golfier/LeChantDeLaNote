@@ -13,14 +13,14 @@ public class PlayerControler : NetworkBehaviour
     public Animator animator;
     public GameObject FirstPlayerPointer;
     public float distToArrow = 2f;
-    public uint MaxHealth = 5;
+    public int MaxHealth = 5;
     public float DeathTime = 5;
     public SpriteRenderer mouthSpriteRenderer;
 
     // Private in game usefull variable
     private float hitBoxRadius;
     private float newPlayerAngle = 0.0f;
-    private uint Health;
+    private int Health;
     public bool isDead = false;
     
     // Movement variable
@@ -100,13 +100,30 @@ public class PlayerControler : NetworkBehaviour
         else if (verticalInput != 0 || horizontalInput != 0)
             UpdateTransform();
     }
-    public void GetHit()
+    public void Dmg()
     {
         if (isDead)
             return;
 
         SoundManager.instance.PlayDmg(gameObject);
+    }
+    public void GetHit()
+    {
+        if (isDead)
+            return;
+
         Health--;
+        SoundManager.instance.PlayGetHit(gameObject);
+        UpdateTheme();
+    }
+
+    private void UpdateTheme()
+    {
+        if (IsLocalPlayer)
+        {
+            uint themeChoice = (uint)Mathf.FloorToInt(Health * 5 / (MaxHealth + 1));
+            SoundManager.instance.ChangeTheme(Health <= 0 ? 5 : themeChoice);
+        }
     }
 
     [ClientRpc]
@@ -133,6 +150,7 @@ public class PlayerControler : NetworkBehaviour
         Health = MaxHealth;
         isDead = false;
         SoundManager.instance.PlayHeal(gameObject);
+        UpdateTheme();
     }
 
     public void LaunchProjectile()

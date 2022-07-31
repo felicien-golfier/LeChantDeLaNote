@@ -31,6 +31,7 @@ public class DetectCollision : MonoBehaviour
                 Destroy(other.gameObject);
                 if (NetworkManager.Singleton.IsHost)
                 {
+                    OriginPlayer.GetComponent<PlayerControler>().Dmg();
                     Destroy(gameObject);
                     ScoreManager.instance.AddScore(1, ClientId, OriginPlayer);
                 }

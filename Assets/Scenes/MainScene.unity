@@ -1705,6 +1705,36 @@ MonoBehaviour:
   dmg: {fileID: 8300000, guid: 59c388ce63f5ab349a3986019f1a2fa7, type: 3}
   heal: {fileID: 8300000, guid: 46b466538bb822c45a8667801d35386e, type: 3}
   attack: {fileID: 8300000, guid: c744a9acbbe854345aa446e47d8e00fc, type: 3}
+  getHit: {fileID: 8300000, guid: 1da734fd95a43f24fb5970c6408a33b2, type: 3}
+  menu: {fileID: 8300000, guid: 76530bd9d715dd84eb8fbacfd51866e0, type: 3}
+  Themes:
+  - clip:
+    - {fileID: 8300000, guid: fc69ffd4c9a7b5c4b93f8ea843e7f62e, type: 3}
+    - {fileID: 8300000, guid: 4058a85ea1960da429688613167dbfef, type: 3}
+    - {fileID: 8300000, guid: 78adc7ea542837449b2deb9dcf0f11dc, type: 3}
+    - {fileID: 8300000, guid: c145702d31b67ae41a1df47937728c95, type: 3}
+  - clip:
+    - {fileID: 8300000, guid: b4ef5078d57dac94f944aa06fa233829, type: 3}
+    - {fileID: 8300000, guid: 9d9245230246417468f176fc24a2b3b7, type: 3}
+    - {fileID: 8300000, guid: 68756d11777611844a8103fe481f7930, type: 3}
+    - {fileID: 8300000, guid: 7b9813ca2379f194299d8b6f71fdcfe9, type: 3}
+  - clip:
+    - {fileID: 8300000, guid: 74fb759b5224c9c44b31d37936424633, type: 3}
+    - {fileID: 8300000, guid: d1024e0371296fe4b9191e615a114f9b, type: 3}
+    - {fileID: 8300000, guid: 31a49db833776ff4bbce5f74388aca91, type: 3}
+    - {fileID: 8300000, guid: 85bf0b3674da8d44aaae677ba5fae323, type: 3}
+  - clip:
+    - {fileID: 8300000, guid: 46e95a096ba4b9f499db99ca1f90d7da, type: 3}
+    - {fileID: 8300000, guid: f3e2375ae62fede49b1cac100da43f35, type: 3}
+    - {fileID: 8300000, guid: dbcfa92cce225fa4a9f12e7af6b24b25, type: 3}
+    - {fileID: 8300000, guid: 39c42688eecfdfd4b95c037b8e4634b9, type: 3}
+  - clip:
+    - {fileID: 8300000, guid: eace49ad81cdb9140a0d1cab96c912c1, type: 3}
+    - {fileID: 8300000, guid: a464a4742efe98c4ebabaab0da22df67, type: 3}
+    - {fileID: 8300000, guid: eec97c43ea42d7c48a5f15ec409bed7d, type: 3}
+    - {fileID: 8300000, guid: ef1eeb058595adf4993d6ea278992e8a, type: 3}
+  - clip:
+    - {fileID: 8300000, guid: 4bf472b0a15bce24c9bda77f10e4394c, type: 3}
 --- !u!1 &1027071465
 GameObject:
   m_ObjectHideFlags: 0

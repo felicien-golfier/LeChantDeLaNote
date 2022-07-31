@@ -296,7 +296,7 @@ MonoBehaviour:
   animator: {fileID: 2847349377794948244}
   FirstPlayerPointer: {fileID: 0}
   distToArrow: 3
-  MaxHealth: 5
+  MaxHealth: 10
   DeathTime: 5
   isDead: 0
 --- !u!114 &1687175624663257688
