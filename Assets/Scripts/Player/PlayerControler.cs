@@ -15,11 +15,14 @@ public class PlayerControler : NetworkBehaviour
     public float distToArrow = 2f;
     public uint MaxHealth = 5;
     public float DeathTime = 5;
+    public SpriteRenderer mouthSpriteRenderer;
+
     // Private in game usefull variable
     private float hitBoxRadius;
     private float newPlayerAngle = 0.0f;
     private uint Health;
     public bool isDead = false;
+    
     // Movement variable
     private VJHandler Joystick;
     private float horizontalInput;
@@ -30,7 +33,7 @@ public class PlayerControler : NetworkBehaviour
         // Set arrow
         FirstPlayerPointer = transform.GetChild(0).gameObject;
         FirstPlayerPointer.SetActive(IsLocalPlayer);
-
+        
         // Getting hitbox characteristics
         CircleCollider2D collider = GetComponent<CircleCollider2D>();
         hitBoxRadius = collider.radius;
@@ -45,6 +48,14 @@ public class PlayerControler : NetworkBehaviour
 
         ScoreManager.instance.AddPlayer(OwnerClientId, gameObject);
         Health = MaxHealth;
+
+        // Positioning the mouth
+        playerAngle = transform.rotation.eulerAngles.z;
+        transform.GetChild(1).position = transform.position + new Vector3(-hitBoxRadius * Mathf.Sin(playerAngle * Mathf.PI / 180), hitBoxRadius * Mathf.Cos(playerAngle * Mathf.PI / 180));
+        transform.GetChild(1).rotation = Quaternion.Euler(0.0f, 0.0f, playerAngle+90.0f);
+        mouthSpriteRenderer = transform.Find("PlayerMouth").GetComponent<SpriteRenderer>();
+
+        playerAngle = transform.rotation.eulerAngles.z;
     }
 
     void Update()
@@ -53,7 +64,6 @@ public class PlayerControler : NetworkBehaviour
         if (!isDead && IsHost && Health <= 0)
             DeathClientRPC();
         
-        playerAngle = transform.rotation.eulerAngles.z;
         if (!IsLocalPlayer)
         {
             return;
@@ -74,10 +84,14 @@ public class PlayerControler : NetworkBehaviour
         if (Input.GetKeyDown(KeyCode.Space))
         {
             LaunchProjectile();
+            animator.SetTrigger("PlayerShoots");
+            //animator.ResetTrigger("PlayerShoots");
+            animator.Play("PlayerShoot");
         }
+        //else
+            //animator.Play("PlayerMouthIdle");
 
-
-        // Player movement handling
+        //Player movement handling
         if (verticalInput == 0 && horizontalInput == 0)
         { 
             animator.SetFloat("playerMovmentSpeed", 0.0f);
@@ -105,7 +119,8 @@ public class PlayerControler : NetworkBehaviour
         StartCoroutine(Tools.RoutineCallFunctionAfterTime(Resurection, DeathTime));
         isDead = true;
         playerSpeed /= 2;
-        SpriteRenderer SR = GetComponent<SpriteRenderer>();
+        SpriteRenderer SR = transform.Find("PlayerBody").GetComponent<SpriteRenderer>();
+        //SpriteRenderer SR = GetComponent<SpriteRenderer>();
         SR.color = new Color(SR.color.r, SR.color.g, SR.color.b,.3f);
         ScoreManager.instance.PlayerReset(OwnerClientId);
     }
@@ -138,9 +153,8 @@ public class PlayerControler : NetworkBehaviour
 
     private void LaunchProjectileLocal()
     {
-        Vector3 offsetSpawn = new Vector3(-Mathf.Sin(playerAngle * Mathf.PI / 180), Mathf.Cos(playerAngle * Mathf.PI / 180), 0);
-        Quaternion angleSpawn = Quaternion.Euler(0f, 0f, playerAngle);
-        GameObject projectile = Instantiate(projectilePrefab, hitBoxRadius * offsetSpawn + transform.position, angleSpawn);
+        Quaternion angleSpawn = Quaternion.Euler(0f, 0f, newPlayerAngle);
+        GameObject projectile = Instantiate(projectilePrefab, new Vector3(-hitBoxRadius*1.5f * Mathf.Sin(newPlayerAngle * Mathf.PI / 180), hitBoxRadius * Mathf.Cos(newPlayerAngle * Mathf.PI / 180)) + transform.position, angleSpawn);
         projectile.GetComponent<ProjectileBehavior>().player = gameObject;
         SoundManager.instance.PlayAttack(gameObject);
     }
@@ -163,13 +177,20 @@ public class PlayerControler : NetworkBehaviour
 
         // Checking the position of the player regarding the limits and stopping the displacement if required
         playerAngle = newPlayerAngle;
+
         //transform.rotation = Quaternion.Euler(0f, 0f, newPlayerAngle);
+        
         int? testPosX = TouchLimitX(newPossiblePosition);
         int? testPosY = TouchLimitY(newPossiblePosition);
         Vector2 newPosition = new Vector2(testPosX == null ? newPossiblePosition.x : (Tools.limitX - hitBoxRadius - 0.7f) * testPosX.Value, testPosY == null ? newPossiblePosition.y : (Tools.limitY - hitBoxRadius - 0.7f) * testPosY.Value);
 
         transform.position = newPosition;
+        flipMouth(newPlayerAngle);
         animator.SetFloat("playerMovmentSpeed", Mathf.Sqrt(Mathf.Pow(frameTrans.x, 2) + Mathf.Pow(frameTrans.y, 2)));
+
+        // Taking care of the mouth
+        transform.GetChild(1).position = transform.position + new Vector3(-hitBoxRadius*1.5f*Mathf.Sin(newPlayerAngle*Mathf.PI/180), hitBoxRadius*1.5f * Mathf.Cos(newPlayerAngle * Mathf.PI / 180));
+        transform.GetChild(1).rotation = Quaternion.Euler(0f, 0f, newPlayerAngle+90.0f);
 
         // Network
         if (IsHost)
@@ -177,6 +198,14 @@ public class PlayerControler : NetworkBehaviour
 
         else
             UpdatePosServerRpc(newPosition, newPlayerAngle);
+    }
+
+    public void flipMouth(float angle)
+    {
+        if (angle <= 0 && angle >= -180)
+            mouthSpriteRenderer.flipY = false;
+        else
+            mouthSpriteRenderer.flipY = true;
     }
 
     [ServerRpc]
