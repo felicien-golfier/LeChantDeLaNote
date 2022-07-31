@@ -29,7 +29,6 @@ public class ScoreManager : NetworkBehaviour
     {
         if(NetworkManager.Singleton && NetworkManager.Singleton.IsHost)
         {
-            NetworkManager.Singleton.OnClientConnectedCallback -= OnConnection;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnDisconnection;
             OnDisconnection(NetworkManager.Singleton.LocalClientId);
         }
@@ -38,14 +37,7 @@ public class ScoreManager : NetworkBehaviour
     {
         if (NetworkManager.Singleton && NetworkManager.Singleton.IsHost)
         {
-            NetworkManager.Singleton.OnClientConnectedCallback += OnConnection;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnDisconnection;
-
-            if (NetworkManager.Singleton.LocalClient != null)
-            {
-                foreach (var clientId in NetworkManager.Singleton.ConnectedClientsIds)
-                    OnConnection(clientId);
-            }
         }   
     }
 
@@ -72,8 +64,7 @@ public class ScoreManager : NetworkBehaviour
     [ClientRpc]
     private void AddScoreClientRpc(int delta, ulong clientId)
     {
-        if (!IsLocalPlayer)
-            AddScoreLocal(delta, clientId);
+        AddScoreLocal(delta, clientId);
     }
     private void AddScoreLocal(int delta, ulong clientId)
     {
@@ -91,16 +82,25 @@ public class ScoreManager : NetworkBehaviour
     }
     public void AddScore(int delta, ulong clientId, GameObject givenPlayer = null)
     {
-        players.TryAdd(clientId, givenPlayer);
-        Debug.Log(IsSpawned);
         if (NetworkManager.Singleton.IsHost)
         {
             AddScoreClientRpc(delta, clientId);
-            AddScoreLocal(delta, clientId);
         }
     }
-
-    private void OnDisconnection(ulong clientID)
+    public void PlayerReset(ulong clientID)
+    {
+        TMPro.TMP_Text PlayerText;
+        if (playersScoreTxt.TryGetValue(clientID, out PlayerText))
+        {
+            PlayerText.text = (0).ToString();
+        }
+    }
+    public void AddPlayer(ulong clientId, GameObject givenPlayer)
+    {
+        if (players.TryAdd(clientId, givenPlayer))
+            CreateAndAddText(clientId);
+    }
+    public void OnDisconnection(ulong clientID)
     {
         if (clientID == NetworkManager.Singleton.LocalClientId)
         {
@@ -125,19 +125,6 @@ public class ScoreManager : NetworkBehaviour
             {
                 players.Remove(clientID);
             }
-        }
-    }
-    private void OnConnection(ulong clientID)
-    {
-        TMPro.TMP_Text newScoreTxt;
-
-        if (playersScoreTxt.TryGetValue(clientID, out newScoreTxt))
-        {
-            newScoreTxt.gameObject.SetActive(true);
-        }
-        else
-        {
-            newScoreTxt = CreateAndAddText(clientID);
         }
     }
 

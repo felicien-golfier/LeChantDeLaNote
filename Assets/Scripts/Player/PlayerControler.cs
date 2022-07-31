@@ -13,11 +13,14 @@ public class PlayerControler : NetworkBehaviour
     public Animator animator;
     public GameObject FirstPlayerPointer;
     public float distToArrow = 2f;
+    public uint MaxHealth = 5;
+    public float DeathTime = 5;
 
     // Private in game usefull variable
     private float hitBoxRadius;
     private float newPlayerAngle = 0.0f;
-
+    private uint Health;
+    public bool isDead = false;
     // Movement variable
     private VJHandler Joystick;
     private float horizontalInput;
@@ -40,11 +43,17 @@ public class PlayerControler : NetworkBehaviour
         {
             sr.color = playercolor;
         }
+
+        ScoreManager.instance.AddPlayer(OwnerClientId, gameObject);
+        Health = MaxHealth;
     }
 
     void Update()
     {
-        // Network
+
+        if (!isDead && IsHost && Health <= 0)
+            DeathClientRPC();
+        
         playerAngle = transform.rotation.eulerAngles.z;
         if (!IsLocalPlayer)
         {
@@ -77,11 +86,41 @@ public class PlayerControler : NetworkBehaviour
         }
         else if (verticalInput != 0 || horizontalInput != 0)
             UpdateTransform();
+    }
+    public void GetHit()
+    {
+        Health--;
+    }
 
+    [ClientRpc]
+    private void DeathClientRPC()
+    {
+        Death();
+    }
+    private void Death()
+    {
+        StartCoroutine(Tools.RoutineCallFunctionAfterTime(Resurection, DeathTime));
+        isDead = true;
+        playerSpeed /= 2;
+        SpriteRenderer SR = GetComponent<SpriteRenderer>();
+        SR.color = new Color(SR.color.r, SR.color.g, SR.color.b,.3f);
+        ScoreManager.instance.PlayerReset(OwnerClientId);
+    }
+
+    private void Resurection()
+    {
+        playerSpeed *= 2;
+        SpriteRenderer SR = GetComponent<SpriteRenderer>();
+        SR.color = new Color(SR.color.r, SR.color.g, SR.color.b, 1);
+        Health = MaxHealth;
+        isDead = false;
     }
 
     public void LaunchProjectile()
     {
+        if (isDead)
+            return;
+
         LaunchProjectileLocal();
         if (NetworkManager.Singleton.IsHost)
         {

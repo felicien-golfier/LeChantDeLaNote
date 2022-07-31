@@ -11,6 +11,7 @@ public class UIConnectionManager : MonoBehaviour
     public TMPro.TextMeshProUGUI connectingText;
     public GameObject[] ToDisplayWhenConnected;
     public GameObject[] ToDisplayWhenDisconnected;
+    public TMPro.TMP_Text ipAddress;
 
     private bool isConnecting = false;
     private string[] ConnectionStatusTexts = { "Not Connected", "Connected as CLIENT", "Connected as HOST", "Connection..." };
@@ -28,6 +29,7 @@ public class UIConnectionManager : MonoBehaviour
         connectingText.text = ConnectionStatusTexts[0];
         networkDiscovery = networkManager.GetComponent<MyNetworkDiscovery>();
         OnChangeConnection(false);
+        ipAddress.text = Tools.GetLocalIPv4();
     }
 
     public void StartClientConnection()
@@ -122,7 +124,7 @@ public class UIConnectionManager : MonoBehaviour
         connectingText.text = ConnectionStatusTexts[0];
         networkDiscovery.StopDiscovery();
         OnChangeConnection(false);
-
+        ScoreManager.instance.OnDisconnection(NetworkManager.Singleton.LocalClientId);
     }
 
     public void FireButton()

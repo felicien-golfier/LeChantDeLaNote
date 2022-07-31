@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class Tools : MonoBehaviour
 {
-
     public readonly static int limitY = 42;
     public readonly static int limitX = 34;
     public readonly static int zCamera = -10;
