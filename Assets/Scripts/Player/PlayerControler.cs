@@ -88,6 +88,9 @@ public class PlayerControler : NetworkBehaviour
     }
     public void GetHit()
     {
+        if (isDead)
+            return;
+
         SoundManager.instance.PlayDmg(gameObject);
         Health--;
     }
