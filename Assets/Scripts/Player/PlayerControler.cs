@@ -145,7 +145,8 @@ public class PlayerControler : NetworkBehaviour
     private void Resurection()
     {
         playerSpeed *= 2;
-        SpriteRenderer SR = GetComponent<SpriteRenderer>();
+        SpriteRenderer SR = transform.Find("PlayerBody").GetComponent<SpriteRenderer>();
+        //SpriteRenderer SR = GetComponent<SpriteRenderer>();
         SR.color = new Color(SR.color.r, SR.color.g, SR.color.b, 1);
         Health = MaxHealth;
         isDead = false;
