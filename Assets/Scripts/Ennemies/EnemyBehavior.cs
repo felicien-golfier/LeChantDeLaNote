@@ -9,19 +9,12 @@ public class EnemyBehavior : MonoBehaviour
     public Animator animator;
     public float speed = 25; 
 
-    NetworkManager networkManager;
     GameObject target = null;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        networkManager = NetworkManager.Singleton;
-    }
 
     // Update is called once per frame
     void Update()
     {
-        if (!networkManager.IsHost)
+        if (!NetworkManager.Singleton.IsHost)
             return;
 
         animator.SetFloat("ennemyMovmentSpeed", 0.0f);
@@ -52,7 +45,7 @@ public class EnemyBehavior : MonoBehaviour
     {
         GameObject possibleTarget = null;
         float minSquaredDist = float.MaxValue;
-        foreach (NetworkClient client in networkManager.ConnectedClientsList)
+        foreach (NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
         {
             if (client.PlayerObject == null)
                 continue;
