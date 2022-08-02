@@ -8,7 +8,6 @@ public class PlayerControler : NetworkBehaviour
 {
     // Public Variables
     public GameObject projectilePrefab;
-    public float playerAngle;
     public float playerSpeed = 15.0f;
     public Animator animator;
     public GameObject FirstPlayerPointer;
@@ -19,7 +18,7 @@ public class PlayerControler : NetworkBehaviour
 
     // Private in game usefull variable
     private float hitBoxRadius;
-    private float newPlayerAngle = 0.0f;
+    private float playerAngle = 0.0f;
     private int Health;
     public bool isDead = false;
     
@@ -31,7 +30,8 @@ public class PlayerControler : NetworkBehaviour
     void Start()
     {
         // Set arrow
-        FirstPlayerPointer = transform.GetChild(0).gameObject;
+        if (FirstPlayerPointer == null)
+            FirstPlayerPointer = transform.GetChild(0).gameObject;
         FirstPlayerPointer.SetActive(IsLocalPlayer);
         
         // Getting hitbox characteristics
@@ -40,11 +40,6 @@ public class PlayerControler : NetworkBehaviour
 
         // Handling the directionnal stick
         Joystick = VJHandler.instance;
-        Color playercolor = new Color(UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f), UnityEngine.Random.Range(0f, 1f));
-        foreach (SpriteRenderer sr in GetComponentsInChildren<SpriteRenderer>())
-        {
-            sr.color = playercolor;
-        }
 
         ScoreManager.instance.AddPlayer(OwnerClientId, gameObject);
         Health = MaxHealth;
@@ -53,9 +48,8 @@ public class PlayerControler : NetworkBehaviour
         playerAngle = transform.rotation.eulerAngles.z;
         transform.GetChild(1).position = transform.position + new Vector3(-hitBoxRadius * Mathf.Sin(playerAngle * Mathf.PI / 180), hitBoxRadius * Mathf.Cos(playerAngle * Mathf.PI / 180));
         transform.GetChild(1).rotation = Quaternion.Euler(0.0f, 0.0f, playerAngle+90.0f);
-        mouthSpriteRenderer = transform.Find("PlayerMouth").GetComponent<SpriteRenderer>();
-
-        playerAngle = transform.rotation.eulerAngles.z;
+        if (mouthSpriteRenderer == null)
+            mouthSpriteRenderer = transform.Find("PlayerMouth").GetComponent<SpriteRenderer>();
     }
 
     void Update()
@@ -99,6 +93,10 @@ public class PlayerControler : NetworkBehaviour
         }
         else if (verticalInput != 0 || horizontalInput != 0)
             UpdateTransform();
+    }
+    public float GetPlayerAngle()
+    {
+        return playerAngle;
     }
     public void Dmg()
     {
@@ -172,10 +170,15 @@ public class PlayerControler : NetworkBehaviour
 
     private void LaunchProjectileLocal()
     {
-        Quaternion angleSpawn = Quaternion.Euler(0f, 0f, newPlayerAngle);
-        GameObject projectile = Instantiate(projectilePrefab, new Vector3(-hitBoxRadius*1.5f * Mathf.Sin(newPlayerAngle * Mathf.PI / 180), hitBoxRadius * Mathf.Cos(newPlayerAngle * Mathf.PI / 180)) + transform.position, angleSpawn);
+        Quaternion angleSpawn = Quaternion.Euler(0f, 0f, playerAngle);
+        GameObject projectile = Instantiate(projectilePrefab, new Vector3(-hitBoxRadius*1.5f * Mathf.Sin(playerAngle * Mathf.PI / 180), hitBoxRadius * Mathf.Cos(playerAngle * Mathf.PI / 180)) + transform.position, angleSpawn);
         projectile.GetComponent<ProjectileBehavior>().player = gameObject;
         SoundManager.instance.PlayAttack(gameObject);
+
+        //Mouth Anim 
+        //animator.ResetTrigger("PlayerShoots");
+        //animator.SetTrigger("PlayerShoots");
+        animator.Play("PlayerShoot");
     }
 
 
@@ -185,38 +188,38 @@ public class PlayerControler : NetworkBehaviour
     {
         // Orientation and next frame position
         if (verticalInput > 0)
-            newPlayerAngle = Mathf.Acos(horizontalInput / (Mathf.Sqrt(Mathf.Pow(horizontalInput, 2) + Mathf.Pow(verticalInput, 2))));
+            playerAngle = Mathf.Acos(horizontalInput / (Mathf.Sqrt(Mathf.Pow(horizontalInput, 2) + Mathf.Pow(verticalInput, 2))));
         else if ((verticalInput < 0))
-            newPlayerAngle = -Mathf.Acos(horizontalInput / (Mathf.Sqrt(Mathf.Pow(horizontalInput, 2) + Mathf.Pow(verticalInput, 2))));
+            playerAngle = -Mathf.Acos(horizontalInput / (Mathf.Sqrt(Mathf.Pow(horizontalInput, 2) + Mathf.Pow(verticalInput, 2))));
         else
-            newPlayerAngle = horizontalInput>0 ? 0 : Mathf.PI;
-        newPlayerAngle = newPlayerAngle * 180 / Mathf.PI-90;
+            playerAngle = horizontalInput > 0 ? 0 : Mathf.PI;
+        playerAngle = playerAngle * 180 / Mathf.PI - 90;
         Vector2 frameTrans = new Vector2(horizontalInput, verticalInput) * Time.deltaTime * playerSpeed;
         Vector2 newPossiblePosition = new Vector2(transform.position.x, transform.position.y) + frameTrans;
 
-        // Checking the position of the player regarding the limits and stopping the displacement if required
-        playerAngle = newPlayerAngle;
-
-        //transform.rotation = Quaternion.Euler(0f, 0f, newPlayerAngle);
-        
         int? testPosX = TouchLimitX(newPossiblePosition);
         int? testPosY = TouchLimitY(newPossiblePosition);
         Vector2 newPosition = new Vector2(testPosX == null ? newPossiblePosition.x : (Tools.limitX - hitBoxRadius - 0.7f) * testPosX.Value, testPosY == null ? newPossiblePosition.y : (Tools.limitY - hitBoxRadius - 0.7f) * testPosY.Value);
 
         transform.position = newPosition;
-        flipMouth(newPlayerAngle);
         animator.SetFloat("playerMovmentSpeed", Mathf.Sqrt(Mathf.Pow(frameTrans.x, 2) + Mathf.Pow(frameTrans.y, 2)));
 
-        // Taking care of the mouth
-        transform.GetChild(1).position = transform.position + new Vector3(-hitBoxRadius*1.5f*Mathf.Sin(newPlayerAngle*Mathf.PI/180), hitBoxRadius*1.5f * Mathf.Cos(newPlayerAngle * Mathf.PI / 180));
-        transform.GetChild(1).rotation = Quaternion.Euler(0f, 0f, newPlayerAngle+90.0f);
+        UpdateMouth();
 
         // Network
         if (IsHost)
-            UpdatePosClientRpc(newPosition, newPlayerAngle);
+            UpdatePosClientRpc(newPosition, playerAngle);
 
         else
-            UpdatePosServerRpc(newPosition, newPlayerAngle);
+            UpdatePosServerRpc(newPosition, playerAngle);
+    }
+
+    private void UpdateMouth()
+    {
+        // Taking care of the mouth
+        flipMouth(playerAngle);
+        mouthSpriteRenderer.transform.position = transform.position + new Vector3(-hitBoxRadius * 1.5f * Mathf.Sin(playerAngle * Mathf.PI / 180), hitBoxRadius * 1.5f * Mathf.Cos(playerAngle * Mathf.PI / 180));
+        mouthSpriteRenderer.transform.rotation = Quaternion.Euler(0f, 0f, playerAngle + 90.0f);
     }
 
     public void flipMouth(float angle)
@@ -240,7 +243,8 @@ public class PlayerControler : NetworkBehaviour
         if (IsLocalPlayer)
             return;
 
-        transform.rotation = Quaternion.Euler(0f, 0f, Orientation);
+        playerAngle = Orientation;
+        UpdateMouth();
         transform.position = Position;
     }
 

@@ -16,7 +16,7 @@ public class ProjectileBehavior : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playerAngle = player.GetComponent<PlayerControler>().playerAngle;
+        playerAngle = player.GetComponent<PlayerControler>().GetPlayerAngle();
         projectileLifeTime =  projectileRange/ projectileSpeed;
         ProjectileForwardVector = new Vector2(-Mathf.Sin(playerAngle*Mathf.PI/180), Mathf.Cos(playerAngle * Mathf.PI / 180));
     }

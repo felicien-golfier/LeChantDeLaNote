@@ -291,13 +291,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   projectilePrefab: {fileID: 6538661746489831961, guid: ea2c307048d87954eba044e2fb20b7b3, type: 3}
-  playerAngle: 0
   playerSpeed: 15
   animator: {fileID: 2847349377794948244}
-  FirstPlayerPointer: {fileID: 0}
+  FirstPlayerPointer: {fileID: 6492772519085145643}
   distToArrow: 3
   MaxHealth: 10
   DeathTime: 5
+  mouthSpriteRenderer: {fileID: 3785447403105913322}
   isDead: 0
 --- !u!114 &1687175624663257688
 MonoBehaviour:
