@@ -6,11 +6,14 @@ public class DecorControler : MonoBehaviour
 {
 
     public GameObject [] limits;
-
+    public SpriteRenderer Background;
 
     // Start is called before the first frame update
     void Start()
     {
+        Background.size = new Vector2(2 * Tools.limitX, 2 * Tools.limitY);
+        Background.transform.localPosition = Vector3.zero;
+
         // Top boundary
         limits[0].transform.position = new Vector3(0, Tools.limitY, 0);
         limits[0].transform.localScale = new Vector3(2 * Tools.limitX, 1, 1);
